@@ -101,7 +101,8 @@ function Invoke-WorkBuddy {
 function Invoke-TraeWork {
     $app = Get-AppWindow 'TRAE SOLO CN' 'E:\TRAE SOLO CN\TRAE SOLO CN.exe'
     Click-Relative $app 0.070 0.955 '打开账户菜单'
-    Click-Relative $app 0.102 0.610 '每日签到领 200 积分（若已签到则按钮无效）'
+    # 签到操作在账户菜单这一行的右侧按钮，不是左侧文字区域。
+    Click-Relative $app 0.145 0.635 '点击每日签到按钮（若已签到则按钮无效）'
     Write-Log 'TraeWork 流程完成。'
 }
 

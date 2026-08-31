@@ -7,4 +7,4 @@
 - 日志目录：`logs\daily-points-YYYY-MM-DD.log`
 - 演练模式：`powershell -NoProfile -ExecutionPolicy Bypass -File .\daily-points.ps1 -DryRun`
 
-脚本按相对窗口位置执行，开始时会最大化目标软件。界面布局、分辨率或软件版本发生明显变化后，应先使用演练模式复核日志，再恢复实际运行。
+脚本按相对窗口位置执行，开始时会最大化目标软件。TraeWork 的签到按钮位于账户菜单签到行的右侧。界面布局、分辨率或软件版本发生明显变化后，应先使用演练模式复核日志，再恢复实际运行。
