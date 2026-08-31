@@ -6,7 +6,9 @@ $ErrorActionPreference = 'Stop'
 
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $logDir = Join-Path $scriptRoot 'logs'
+$evidenceDir = Join-Path $scriptRoot 'evidence'
 New-Item -ItemType Directory -Path $logDir -Force | Out-Null
+New-Item -ItemType Directory -Path $evidenceDir -Force | Out-Null
 $logFile = Join-Path $logDir ("daily-points-{0}.log" -f (Get-Date -Format 'yyyy-MM-dd'))
 
 Add-Type @'
@@ -37,6 +39,22 @@ public static class DailyPointsNative {
 function Write-Log([string]$Message) {
     $line = "{0} {1}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $Message
     $line | Tee-Object -FilePath $logFile -Append
+}
+
+function Save-ScreenEvidence([string]$Name) {
+    $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+    $bitmap = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
+    $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+    try {
+        $graphics.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size)
+        $path = Join-Path $evidenceDir ("{0}-{1}.png" -f (Get-Date -Format 'yyyyMMdd-HHmmss'), $Name)
+        $bitmap.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
+        Write-Log "已保存界面证据：$path"
+    }
+    finally {
+        $graphics.Dispose()
+        $bitmap.Dispose()
+    }
 }
 
 function Get-AppWindow([string]$ProcessName, [string]$ExecutablePath) {
@@ -101,9 +119,13 @@ function Invoke-WorkBuddy {
 function Invoke-TraeWork {
     $app = Get-AppWindow 'TRAE SOLO CN' 'E:\TRAE SOLO CN\TRAE SOLO CN.exe'
     Click-Relative $app 0.070 0.955 '打开账户菜单'
+    Start-Sleep -Milliseconds 500
+    Save-ScreenEvidence 'traework-before-signin'
     # 签到操作在账户菜单这一行的右侧按钮，不是左侧文字区域。
-    Click-Relative $app 0.145 0.635 '点击每日签到按钮（若已签到则按钮无效）'
-    Write-Log 'TraeWork 流程完成。'
+    Click-Relative $app 0.145 0.635 '点击每日签到右侧按钮'
+    Start-Sleep -Seconds 2
+    Save-ScreenEvidence 'traework-after-signin'
+    Write-Log 'TraeWork 已完成点击并保存前后截图；请以 after-signin 证据中的“今日已签”作为成功依据。'
 }
 
 Add-Type -AssemblyName System.Windows.Forms
