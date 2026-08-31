@@ -5,11 +5,17 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+$configPath = Join-Path $scriptRoot 'config.json'
 $logDir = Join-Path $scriptRoot 'logs'
 $evidenceDir = Join-Path $scriptRoot 'evidence'
 New-Item -ItemType Directory -Path $logDir -Force | Out-Null
 New-Item -ItemType Directory -Path $evidenceDir -Force | Out-Null
 $logFile = Join-Path $logDir ("daily-points-{0}.log" -f (Get-Date -Format 'yyyy-MM-dd'))
+
+if (-not (Test-Path -LiteralPath $configPath)) {
+    throw "缺少 config.json。请先运行 setup.ps1 完成本机路径配置。"
+}
+$config = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
 
 Add-Type @'
 using System;
@@ -109,20 +115,20 @@ function Click-Relative([Diagnostics.Process]$Process, [double]$X, [double]$Y, [
 }
 
 function Invoke-WorkBuddy {
-    $app = Get-AppWindow 'WorkBuddy' 'E:\Workbuddy\WorkBuddy.exe'
-    Click-Relative $app 0.052 0.955 '打开账户菜单'
-    Click-Relative $app 0.090 0.540 '打开 Buddy 加油站'
-    Click-Relative $app 0.047 0.910 '领取每日积分（若已领取则按钮无效）'
+    $app = Get-AppWindow $config.workbuddy.processName $config.workbuddy.exePath
+    Click-Relative $app $config.workbuddy.points.accountX $config.workbuddy.points.accountY '打开账户菜单'
+    Click-Relative $app $config.workbuddy.points.stationX $config.workbuddy.points.stationY '打开 Buddy 加油站'
+    Click-Relative $app $config.workbuddy.points.claimX $config.workbuddy.points.claimY '领取每日积分（若已领取则按钮无效）'
     Write-Log 'WorkBuddy 流程完成。'
 }
 
 function Invoke-TraeWork {
-    $app = Get-AppWindow 'TRAE SOLO CN' 'E:\TRAE SOLO CN\TRAE SOLO CN.exe'
-    Click-Relative $app 0.070 0.955 '打开账户菜单'
+    $app = Get-AppWindow $config.traework.processName $config.traework.exePath
+    Click-Relative $app $config.traework.points.accountX $config.traework.points.accountY '打开账户菜单'
     Start-Sleep -Milliseconds 500
     Save-ScreenEvidence 'traework-before-signin'
     # 签到操作在账户菜单这一行的右侧按钮，不是左侧文字区域。
-    Click-Relative $app 0.145 0.635 '点击每日签到右侧按钮'
+    Click-Relative $app $config.traework.points.signInX $config.traework.points.signInY '点击每日签到右侧按钮'
     Start-Sleep -Seconds 2
     Save-ScreenEvidence 'traework-after-signin'
     Write-Log 'TraeWork 已完成点击并保存前后截图；请以 after-signin 证据中的“今日已签”作为成功依据。'

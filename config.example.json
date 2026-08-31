@@ -1,0 +1,25 @@
+{
+  "scheduleTime": "09:00",
+  "workbuddy": {
+    "processName": "WorkBuddy",
+    "exePath": "E:\\Workbuddy\\WorkBuddy.exe",
+    "points": {
+      "accountX": 0.052,
+      "accountY": 0.955,
+      "stationX": 0.090,
+      "stationY": 0.540,
+      "claimX": 0.047,
+      "claimY": 0.910
+    }
+  },
+  "traework": {
+    "processName": "TRAE SOLO CN",
+    "exePath": "E:\\TRAE SOLO CN\\TRAE SOLO CN.exe",
+    "points": {
+      "accountX": 0.070,
+      "accountY": 0.955,
+      "signInX": 0.145,
+      "signInY": 0.635
+    }
+  }
+}
